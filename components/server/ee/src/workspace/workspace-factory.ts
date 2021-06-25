@@ -8,7 +8,7 @@ import * as uuidv4 from 'uuid/v4';
 import { WorkspaceFactory } from "../../../src/workspace/workspace-factory";
 import { injectable, inject } from "inversify";
 import { TraceContext } from "@gitpod/gitpod-protocol/lib/util/tracing";
-import { User, StartPrebuildContext, Workspace, CommitContext, PrebuiltWorkspaceContext, WorkspaceContext, WithSnapshot, WithPrebuild, TaskConfig } from "@gitpod/gitpod-protocol";
+import { User, StartPrebuildContext, Workspace, CommitContext, PrebuiltWorkspaceContext, WorkspaceContext, WithSnapshot, WithPrebuild, TaskConfig, AdditionalContentContext } from "@gitpod/gitpod-protocol";
 import { log } from '@gitpod/gitpod-protocol/lib/util/logging';
 import { LicenseEvaluator } from '@gitpod/licensor/lib';
 import { Feature } from '@gitpod/licensor/lib/api';
@@ -46,19 +46,25 @@ export class WorkspaceFactoryEE extends WorkspaceFactory {
                 throw new Error("Can only prebuild workspaces with a commit context")
             }
 
-            const { project, branch } = context;
-
             const commitContext: CommitContext = context.actual;
-            const existingPWS = await this.db.trace({span}).findPrebuiltWorkspaceByCommit(commitContext.repository.cloneUrl, commitContext.revision);
-            if (existingPWS) {
-                const wsInstance = await this.db.trace({span}).findRunningInstance(existingPWS.buildWorkspaceId);
-                if (wsInstance) {
-                    throw new Error("A prebuild is already running for this commit.");
-                }
-            }
+
+            const { project, branch } = context;
 
             const config = await this.configProvider.fetchConfig({span}, user, context.actual);
             const imageSource = await this.imageSourceProvider.getImageSource(ctx, user, context.actual, config);
+            if (config._origin === 'project-db' && project?.config) {
+                // If the project is configured via the Project DB, place the uncommitted configuration into the workspace, encouraging Git-based configuration.
+                // TODO(janx): Move this to a more central place like `createForPrebuiltWorkspace` and `createForCommit`?
+                (commitContext as any as AdditionalContentContext).additionalFiles = { '.gitpod.yml': project.config };
+            }
+
+            const existingPWS = await this.db.trace({span}).findPrebuiltWorkspaceByCommit(commitContext.repository.cloneUrl, commitContext.revision);
+            if (existingPWS) {
+                const wsInstance = await this.db.trace({span}).findRunningInstance(existingPWS.buildWorkspaceId);
+                if (wsInstance /* && project config is the same */) {
+                    throw new Error("A prebuild is already running for this commit.");
+                }
+            }
 
             // Walk back the commit history to find suitable parent prebuild to start an incremental prebuild on.
             let ws;

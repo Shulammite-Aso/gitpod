@@ -24,9 +24,24 @@ export class ProjectDBImpl implements ProjectDB {
         return (await this.getEntityManager()).getRepository<DBProject>(DBProject);
     }
 
+    public async findProjectById(projectId: string): Promise<Project | undefined> {
+        const repo = await this.getRepo();
+        return repo.findOne({ id: projectId });
+    }
+
+    public async findProjectByCloneUrl(cloneUrl: string): Promise<Project | undefined> {
+        const repo = await this.getRepo();
+        return repo.findOne({ cloneUrl });
+    }
+
     public async findProjectsByTeam(teamId: string): Promise<Project[]> {
         const repo = await this.getRepo();
         return repo.find({ teamId });
+    }
+
+    public async findProjectByInstallationId(appInstallationId: string): Promise<Project | undefined> {
+        const repo = await this.getRepo();
+        return repo.findOne({ appInstallationId });
     }
 
     public async createProject(name: string, cloneUrl: string, teamId: string, appInstallationId: string): Promise<Project> {
@@ -44,9 +59,13 @@ export class ProjectDBImpl implements ProjectDB {
         return project;
     }
 
-    async findProjectByInstallationId(appInstallationId: string): Promise<Project | undefined> {
+    public async setProjectConfiguration(projectId: string, config: string): Promise<void> {
         const repo = await this.getRepo();
-        const project = await repo.findOne({ appInstallationId });
-        return project;
+        const project = await repo.findOne({ id: projectId, deleted: false });
+        if (!project) {
+            throw new Error('A project with this ID could not be found');
+        }
+        project.config = config;
+        await repo.save(project);
     }
 }
