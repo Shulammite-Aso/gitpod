@@ -10,4 +10,5 @@ import { Repository, User } from "@gitpod/gitpod-protocol"
 export const RepositoryProvider = Symbol('RepositoryProvider');
 export interface RepositoryProvider {
     getRepo(user: User, owner: string, repo: string): Promise<Repository>;
+    getBranches(user: User, owner: string, repo: string): Promise<string[]>;
 }

@@ -241,9 +241,15 @@ export class GitHubRestApi {
     }
 
     public async getRepository(user: User, params: RestEndpointMethodTypes["repos"]["get"]["parameters"]): Promise<Repository> {
-        const key = `getRepository:${params.owner}/${params.owner}:${user.id}`
+        const key = `getRepository:${params.owner}/${params.owner}:${user.id}`;
         const response = await this.runWithCache(key, user, (api) => api.repos.get(params));
         return response.data;
+    }
+
+    public async getBranches(user: User, params: RestEndpointMethodTypes["repos"]["listBranches"]["parameters"]): Promise<string[]> {
+        const key = `getBranches:${params.owner}/${params.owner}:${user.id}`;
+        const response = (await this.runWithCache(key, user, (api) => api.repos.listBranches(params))) as RestEndpointMethodTypes["repos"]["listBranches"]["response"];
+        return response.data.map(b => b.name);
     }
 
 }

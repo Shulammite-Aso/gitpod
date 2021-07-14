@@ -78,6 +78,7 @@ import { AdditionalContentPrefixContextParser } from './workspace/additional-con
 import { WorkspaceLogService } from './workspace/workspace-log-service';
 import { HeadlessLogController } from './workspace/headless-log-controller';
 import { IAnalyticsWriter } from '@gitpod/gitpod-protocol/lib/analytics';
+import { ProjectsService } from './projects/projects-service';
 
 export const productionContainerModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     bind(Env).toSelf().inSingletonScope();
@@ -201,4 +202,6 @@ export const productionContainerModule = new ContainerModule((bind, unbind, isBo
 
     bind(WorkspaceLogService).toSelf().inSingletonScope();
     bind(HeadlessLogController).toSelf().inSingletonScope();
+
+    bind(ProjectsService).toSelf().inSingletonScope();
 });

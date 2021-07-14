@@ -29,4 +29,9 @@ export class GitlabRepositoryProvider implements RepositoryProvider {
         const webUrl = response.web_url;
         return { host, owner, name, cloneUrl, description, avatarUrl, webUrl };
     }
+
+    async getBranches(user: User, owner: string, repo: string): Promise<string[]> {
+        // todo
+        return [];
+    }
 }

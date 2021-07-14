@@ -29,6 +29,11 @@ export class ProjectDBImpl implements ProjectDB {
         return repo.find({ teamId });
     }
 
+    public async findProject(teamId: string, projectName: string): Promise<Project | undefined> {
+        const projects = await this.findProjectsByTeam(teamId);
+        return projects.find(p => p.name === projectName);
+    }
+
     public async createProject(name: string, cloneUrl: string, teamId: string, appInstallationId: string): Promise<Project> {
         const repo = await this.getRepo();
 

@@ -25,4 +25,9 @@ export class BitbucketRepositoryProvider implements RepositoryProvider {
         const webUrl = repo.links!.html!.href;
         return { host, owner, name, cloneUrl, description, avatarUrl, webUrl };
     }
+
+    async getBranches(user: User, owner: string, repo: string): Promise<string[]> {
+        // todo
+        return [];
+    }
 }

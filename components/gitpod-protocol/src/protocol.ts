@@ -1217,6 +1217,30 @@ export interface ProjectInfo extends Project {
     lastPrebuild?: PrebuildInfo;
 }
 
+export namespace Project {
+    export interface Overview {
+        [branch: string]: BranchDetails
+    }
+
+    export interface BranchDetails {
+        name: string;
+        branchUrl: string;
+        isDefault: boolean;
+
+        // PR/MR
+        changeTitle: string;
+        changeDate: string;
+        changeAuthor: string;
+        changeAuthorAvatar?: string;
+        changePR?: string;
+        changeUrl?: string;
+        changeHash: string;
+
+        // PREBUILD
+        status?: PrebuiltWorkspaceState;
+    }
+}
+
 export interface PrebuildInfo {
     id: string;
     teamId: string;
