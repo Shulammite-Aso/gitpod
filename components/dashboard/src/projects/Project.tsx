@@ -112,13 +112,13 @@ export default function () {
             <ItemsList className="mt-2">
                 <Item header={true} className="grid grid-cols-3">
                     <ItemField>
-                        <span>Branch</span>
+                        <span>Prebuild</span>
                     </ItemField>
                     <ItemField>
                         <span>Commit</span>
                     </ItemField>
-                    <ItemField className="flex items-center">
-                        <span>Prebuild</span>
+                    <ItemField>
+                        <span>Branch</span>
                         <ItemFieldContextMenu />
                     </ItemField>
                 </Item>
@@ -147,6 +147,7 @@ export default function () {
                                 <div className="inline-block align-text-bottom mr-2 w-4 h-4">{branch.status && prebuildStatusIcon(branch.status)}</div>
                                 {branch.status && prebuildStatusLabel(branch.status)}
                             </div>
+                            <span className="flex-grow" />
                             <ItemFieldContextMenu menuEntries={prebuildContextMenu(branch)} />
                         </ItemField>
                     </Item>}
