@@ -8,7 +8,6 @@ import { inject, injectable } from "inversify";
 import { DBWithTracing, ProjectDB, TeamDB, TracedWorkspaceDB, WorkspaceDB } from "@gitpod/gitpod-db/lib";
 import { CreateProjectParams, PrebuildInfo, PrebuiltWorkspace, Project, ProjectInfo, User } from "@gitpod/gitpod-protocol";
 import { HostContextProvider } from "../auth/host-context-provider";
-import { GithubContextParser } from "../github/github-context-parser";
 import { parseRepoUrl } from "../repohost";
 
 @injectable()
@@ -18,7 +17,6 @@ export class ProjectsService {
     @inject(TeamDB) protected readonly teamDB: TeamDB;
     @inject(TracedWorkspaceDB) protected readonly workspaceDb: DBWithTracing<WorkspaceDB>;
     @inject(HostContextProvider) protected readonly hostContextProvider: HostContextProvider;
-    @inject(GithubContextParser) protected readonly githubContextProvider: GithubContextParser;
 
     async getProjects(teamId: string): Promise<ProjectInfo[]> {
         const result: ProjectInfo[] = [];

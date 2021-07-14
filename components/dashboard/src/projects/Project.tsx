@@ -40,7 +40,7 @@ export default function () {
             const project = projects.find(p => p.name === projectName);
             if (project) {
                 setProject(project);
-                setProjectDetails(await getGitpodService().server.getProjectOverview(team.id, project.id));
+                setProjectDetails(await getGitpodService().server.getProjectOverview(team.id, project.name));
                 if (projectDetails) {
                     Object.keys(projectDetails)
                 }
