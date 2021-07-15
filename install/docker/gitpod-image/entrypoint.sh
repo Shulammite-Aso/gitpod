@@ -9,7 +9,7 @@ mount --make-rshared /
 
 
 BASEDOMAIN=${BASEDOMAIN:-}                          # Used as Gitpod domain, `gitpod.` prefix will be added.
-DOMAIN=${DOMAIN:-}                                  # Used as Gitpod ddomain as is.
+DOMAIN=${DOMAIN:-}                                  # Used as Gitpod domain as is.
 REMOVE_NETWORKPOLICIES=${REMOVE_NETWORKPOLICIES:-}  # Remove Gitpod network policies when set to 'true'.
 HELMIMAGE=${HELMIMAGE:-alpine/helm:3.6.2}           # Image that is used for the helm install.
 
@@ -76,14 +76,18 @@ if [ -n "$TCP_DNS_ADDR" ] && [ -n "$UDP_DNS_ADDR" ]; then
     add_nameserver "$(hostname -i | cut -f1 -d' ')"
 fi
 
-
 # add HTTPS certs secret if certs are given in the folder /certs
-if [ -f /certs/cert.pem ] &&  [ -f /certs/chain.pem ] && [ -f /certs/dhparams.pem ] && [ -f /certs/fullchain.pem ] && [ -f /certs/privkey.pem ]; then
-    CERT=$(base64 --wrap=0 < /certs/cert.pem)
-    CHAIN=$(base64 --wrap=0 < /certs/chain.pem)
-    DHPARAMS=$(base64 --wrap=0 < /certs/dhparams.pem)
-    FULLCHAIN=$(base64 --wrap=0 < /certs/fullchain.pem)
-    PRIVKEY=$(base64 --wrap=0 < /certs/privkey.pem)
+CERT=
+KEY=
+if [ -f /certs/fullchain.pem ] && [ -f /certs/privkey.pem ]; then
+    CERT=$(base64 --wrap=0 < /certs/fullchain.pem)
+    KEY=$(base64 --wrap=0 < /certs/privkey.pem)
+fi
+if [ -f /certs/tls.crt ] && [ -f /certs/tls.key ]; then
+    CERT=$(base64 --wrap=0 < /certs/tls.crt)
+    KEY=$(base64 --wrap=0 < /certs/tls.key)
+fi
+if [ -n "$CERT" ] && [ -n "$KEY" ]; then
     cat << EOF > /var/lib/rancher/k3s/server/manifests/https-certificates.yaml
 apiVersion: v1
 kind: Secret
@@ -92,14 +96,11 @@ metadata:
   labels:
     app: gitpod
 data:
-  cert.pem: $CERT
-  chain.pem: $CHAIN
-  dhparams.pem: $DHPARAMS
-  fullchain.pem: $FULLCHAIN
-  privkey.pem: $PRIVKEY
+  tls.cert: $CERT
+  tls.crt: $CERT
+  tls.key: $KEY
 EOF
 fi
-
 
 # prepare Gitpod helm installer
 GITPOD_HELM_INSTALLER_FILE=/var/lib/rancher/k3s/server/manifests/gitpod-helm-installer.yaml
